@@ -14,4 +14,4 @@ EXPOSE 8080
 # HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 #     CMD curl --fail http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["java","-jar","target/app.jar"]
+ENTRYPOINT ["java","-jar","target/auth-micro-0.0.1-SNAPSHOT.jar"]

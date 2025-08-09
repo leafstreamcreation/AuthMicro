@@ -1,8 +1,8 @@
 # API Testing Examples for Authentication Microservice
 
 # Set your API key and base URL
-$API_KEY = "your-api-key-here"
-$BASE_URL = "http://localhost:8080"
+$API_KEY = "1Pass2rule.th3m4ll"
+$BASE_URL = "http://192.168.132.17:8062"
 
 # Health Check
 Write-Host "Testing Health Check..." -ForegroundColor Green
