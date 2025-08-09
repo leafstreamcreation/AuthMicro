@@ -2,15 +2,14 @@ version: '3.8'
 
 services:
   auth-service:
-    image: auth-api:latest
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - API_KEY_SECRET=${API_KEY_SECRET:-default-api-key-secret-change-in-production}
-      - JWT_SECRET=${JWT_SECRET:-my-super-secret-jwt-signing-key-that-should-be-changed-in-production}
+      - API_KEY_SECRET=${API_KEY_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
       - DB_URL=jdbc:oracle:thin:@oracle-db:1521/XEPDB1
       - DB_USERNAME=admin
       - DB_PASSWORD=secureDbPass
@@ -22,7 +21,7 @@ services:
     restart: unless-stopped
 
   oracle-db:
-    image: gvenzl/oracle-xe:19-slim
+    image: gvenzl/oracle-xe:21-slim
     environment:
       - ORACLE_PASSWORD=secureDbPass
       - APP_USER=admin
