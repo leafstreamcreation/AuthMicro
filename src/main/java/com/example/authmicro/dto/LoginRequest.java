@@ -18,14 +18,11 @@ public class LoginRequest {
 
     private String serviceName = null;
 
-    private Boolean authLogin = false;
-
     public LoginRequest() {}
 
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;
-        this.authLogin = true;
     }
 
     public LoginRequest(String email, String password, String serviceName) {
@@ -51,10 +48,7 @@ public class LoginRequest {
     }
 
     public String getServiceName() {
-        if (authLogin == false) {
-            return serviceName;
-        }
-        return null;
+        return this.serviceName;
     }
 
     public void setServiceName(String serviceName) {

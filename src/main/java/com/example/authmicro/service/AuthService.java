@@ -42,7 +42,7 @@ public class AuthService {
 
         AuthUser user = userOptional.get();
 
-        if (request.getServiceName() == null && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (request.getServiceName() == "null" && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid authr credentials");
         }
         else {
@@ -64,7 +64,7 @@ public class AuthService {
             return new LoginResponse(true, "TOTP verification required");
         }
 
-        String token = request.getServiceName() == null
+        String token = request.getServiceName() == "null"
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
@@ -87,7 +87,7 @@ public class AuthService {
             throw new RuntimeException("Invalid TOTP code");
         }
 
-        String token = request.getServiceName() == null
+        String token = request.getServiceName() == "null"
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
