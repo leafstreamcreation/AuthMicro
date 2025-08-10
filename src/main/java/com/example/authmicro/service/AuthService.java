@@ -41,11 +41,11 @@ public class AuthService {
         }
 
         AuthUser user = userOptional.get();
-        
-        if (user.getRole() == Role.ADMIN && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+
+        if (request.getServiceName() == null && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
         }
-        else if (user.getRole() == Role.USER) {
+        else {
             user.getServiceCredentials()
                     .stream()
                     .filter(cred -> cred.getServiceName().equals(request.getServiceName()))
@@ -64,7 +64,7 @@ public class AuthService {
             return new LoginResponse(true, "TOTP verification required");
         }
 
-        String token = user.getRole() == Role.ADMIN
+        String token = request.getServiceName() == null
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
@@ -87,7 +87,7 @@ public class AuthService {
             throw new RuntimeException("Invalid TOTP code");
         }
 
-        String token = user.getRole() == Role.ADMIN
+        String token = request.getServiceName() == null
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
