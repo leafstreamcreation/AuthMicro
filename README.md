@@ -122,7 +122,7 @@ Authorization: Bearer jwt-token-here
 
 #### Update User Credentials
 ```
-PUT /users/{id}/credentials
+POST /users/{id}/credentials
 Content-Type: application/json
 X-API-Key: your-api-key
 Authorization: Bearer jwt-token-here
@@ -162,7 +162,7 @@ Authorization: Bearer admin-jwt-token
 
 #### Update User Role
 ```
-PUT /users/{id}/role
+POST /users/{id}/role
 Content-Type: application/json
 X-API-Key: your-api-key
 Authorization: Bearer admin-jwt-token
@@ -175,7 +175,7 @@ Authorization: Bearer admin-jwt-token
 ## Security Configuration
 
 ### API Key Authentication
-All endpoints (except `/health`) require a valid `X-API-Key` header:
+All endpoints require a valid `X-API-Key` header:
 ```
 X-API-Key: your-secret-api-key
 ```
@@ -187,8 +187,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### CORS Configuration
-- Allowed origins: `https://trusted-domain.com`
-- Allowed methods: `GET`, `POST`, `PUT`
+- Allowed origins: `*`
+- Allowed methods: `GET`, `POST`
 - Allowed headers: `X-API-Key`, `Content-Type`, `Authorization`
 - Max age: 1800 seconds
 
@@ -218,6 +218,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | `DB_URL` | Oracle database URL | `jdbc:oracle:thin:@localhost:1521/XEPDB1` |
 | `DB_USERNAME` | Database username | `admin` |
 | `DB_PASSWORD` | Database password | `secureDbPass` |
+| `AUTH_SERVICE_PORT` | host port | `secureDbPass` |
 
 ## Health Monitoring
 

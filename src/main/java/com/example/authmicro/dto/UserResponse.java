@@ -9,6 +9,7 @@ public class UserResponse {
     private Role role;
     private boolean has2FA;
     private boolean enabled;
+    private String message;
 
     public UserResponse() {}
 
@@ -18,6 +19,10 @@ public class UserResponse {
         this.role = role;
         this.has2FA = has2FA;
         this.enabled = enabled;
+    }
+
+    public UserResponse(String message) {
+        this.message = message;
     }
 
     public Long getId() {

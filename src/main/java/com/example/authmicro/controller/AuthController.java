@@ -3,7 +3,10 @@ package com.example.authmicro.controller;
 import com.example.authmicro.dto.*;
 import com.example.authmicro.entity.AuthUser;
 import com.example.authmicro.service.AuthService;
+
+import org.apache.tomcat.jni.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -38,7 +41,7 @@ public class AuthController {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new LoginResponse(e.getMessage()));
         }
     }
 
@@ -49,7 +52,7 @@ public class AuthController {
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
         }
     }
 
@@ -60,7 +63,7 @@ public class AuthController {
             LoginResponse response = authService.verifyTotp(email, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new LoginResponse(e.getMessage()));
         }
     }
 
@@ -77,7 +80,9 @@ public class AuthController {
             
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 

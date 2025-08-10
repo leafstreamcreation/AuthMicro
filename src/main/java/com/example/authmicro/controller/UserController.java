@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ public class UserController {
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
         }
     }
 
@@ -49,7 +50,9 @@ public class UserController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responses);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            List<UserResponse> errorResponse = new ArrayList<>();
+            errorResponse.add(new UserResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
@@ -62,7 +65,7 @@ public class UserController {
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
         }
     }
 
@@ -79,7 +82,9 @@ public class UserController {
             
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
@@ -96,7 +101,9 @@ public class UserController {
             
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 }
