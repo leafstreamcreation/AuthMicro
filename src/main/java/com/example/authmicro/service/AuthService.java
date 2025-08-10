@@ -64,7 +64,9 @@ public class AuthService {
             return new LoginResponse(true, "TOTP verification required");
         }
 
-        String token = jwtService.generateToken(user);
+        String token = user.getRole() == Role.ADMIN
+                ? jwtService.generateToken(user)
+                : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
@@ -85,7 +87,9 @@ public class AuthService {
             throw new RuntimeException("Invalid TOTP code");
         }
 
-        String token = jwtService.generateToken(user);
+        String token = user.getRole() == Role.ADMIN
+                ? jwtService.generateToken(user)
+                : jwtService.generateToken(user, request.getServiceName());
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
