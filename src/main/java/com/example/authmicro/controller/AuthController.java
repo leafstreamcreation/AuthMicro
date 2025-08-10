@@ -4,9 +4,8 @@ import com.example.authmicro.dto.*;
 import com.example.authmicro.entity.AuthUser;
 import com.example.authmicro.service.AuthService;
 
-import org.apache.tomcat.jni.User;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -36,34 +35,34 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<Response> login(@Valid @RequestBody LoginRequest request) {
         try {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new LoginResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> signup(@Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<Response> signup(@Valid @RequestBody CreateUserRequest request) {
         try {
             AuthUser user = authService.createUser(request);
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @PostMapping("/2fa/verify")
-    public ResponseEntity<LoginResponse> verify2FA(@Valid @RequestBody TotpVerificationRequest request,
+    public ResponseEntity<Response> verify2FA(@Valid @RequestBody TotpVerificationRequest request,
                                                   @RequestParam String email) {
         try {
             LoginResponse response = authService.verifyTotp(email, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new LoginResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -88,7 +87,7 @@ public class AuthController {
 
     @GetMapping("/profile")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
+    public ResponseEntity<Response> getProfile(Authentication authentication) {
         try {
             String email = authentication.getName();
             AuthUser user = authService.getUserByEmail(email);

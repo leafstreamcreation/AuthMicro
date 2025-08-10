@@ -1,6 +1,6 @@
 package com.example.authmicro.dto;
 
-public class LoginResponse {
+public class LoginResponse extends Response {
     
     private String token;
     private long expiresIn;
@@ -17,10 +17,6 @@ public class LoginResponse {
 
     public LoginResponse(boolean requires2FA, String message) {
         this.requires2FA = requires2FA;
-        this.message = message;
-    }
-
-    public LoginResponse(String message) {
         this.message = message;
     }
 

@@ -2,14 +2,13 @@ package com.example.authmicro.dto;
 
 import com.example.authmicro.entity.Role;
 
-public class UserResponse {
+public class UserResponse extends Response {
     
     private Long id;
     private String email;
     private Role role;
     private boolean has2FA;
     private boolean enabled;
-    private String message;
 
     public UserResponse() {}
 
@@ -19,10 +18,6 @@ public class UserResponse {
         this.role = role;
         this.has2FA = has2FA;
         this.enabled = enabled;
-    }
-
-    public UserResponse(String message) {
-        this.message = message;
     }
 
     public Long getId() {

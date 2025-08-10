@@ -30,42 +30,42 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<Response> createUser(@Valid @RequestBody CreateUserRequest request) {
         try {
             AuthUser user = authService.createUser(request);
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    public ResponseEntity<List<Response>> getAllUsers() {
         try {
             List<AuthUser> users = authService.getAllUsers();
-            List<UserResponse> responses = users.stream()
+            List<Response> responses = users.stream()
                     .map(authService::convertToUserResponse)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responses);
         } catch (RuntimeException e) {
-            List<UserResponse> errorResponse = new ArrayList<>();
-            errorResponse.add(new UserResponse(e.getMessage()));
+            List<Response> errorResponse = new ArrayList<>();
+            errorResponse.add(new ErrorResponse(e.getMessage()));
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
     @PostMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Response> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
             Role role = Role.valueOf(request.get("role"));
             AuthUser user = authService.updateUserRole(id, role);
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new UserResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
