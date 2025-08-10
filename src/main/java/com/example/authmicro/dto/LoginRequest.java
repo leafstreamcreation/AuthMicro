@@ -4,6 +4,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import oracle.net.aso.f;
+
 public class LoginRequest {
     
     @Email
@@ -16,11 +18,14 @@ public class LoginRequest {
 
     private String serviceName = null;
 
+    private Boolean authLogin = false;
+
     public LoginRequest() {}
 
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;
+        this.authLogin = true;
     }
 
     public LoginRequest(String email, String password, String serviceName) {
@@ -46,7 +51,10 @@ public class LoginRequest {
     }
 
     public String getServiceName() {
-        return serviceName;
+        if (authLogin == false) {
+            return serviceName;
+        }
+        return null;
     }
 
     public void setServiceName(String serviceName) {

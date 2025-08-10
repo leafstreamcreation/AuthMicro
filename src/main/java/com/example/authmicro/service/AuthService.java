@@ -43,7 +43,7 @@ public class AuthService {
         AuthUser user = userOptional.get();
 
         if (request.getServiceName() == null && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid auth credentials");
+            throw new RuntimeException("Invalid authr credentials");
         }
         else {
             user.getServiceCredentials()
