@@ -43,7 +43,7 @@ public class AuthService {
         AuthUser user = userOptional.get();
 
         if (request.getServiceName() == null && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new RuntimeException("Invalid auth credentials");
         }
         else {
             user.getServiceCredentials()
@@ -53,10 +53,10 @@ public class AuthService {
                     .ifPresentOrElse(
                         cred -> {
                             if (!passwordEncoder.matches(request.getPassword(), cred.getPasswordHash())) {
-                                throw new RuntimeException("Invalid credentials");
+                                throw new RuntimeException("Invalid credentials for service: " + request.getServiceName());
                             }
                         },
-                        () -> { throw new RuntimeException("Not registered for this service"); }
+                        () -> { throw new RuntimeException("Not registered for service: " + request.getServiceName()); }
                     );
         }
 
