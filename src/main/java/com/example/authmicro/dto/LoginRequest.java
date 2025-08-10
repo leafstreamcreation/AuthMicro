@@ -14,17 +14,16 @@ public class LoginRequest {
     @Size(min = 6, max = 100)
     private String password;
 
-    private String serviceName;
+    private String serviceName = null;
 
     public LoginRequest() {}
 
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;
-        this.serviceName = null;
     }
 
-    public LoginRequest(String email, String password, String serviceName ) {
+    public LoginRequest(String email, String password, String serviceName) {
         this.email = email;
         this.password = password;
         this.serviceName = serviceName;
