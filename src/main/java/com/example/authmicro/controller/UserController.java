@@ -53,7 +53,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}/role")
+    @PostMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
@@ -66,7 +66,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}/credentials")
+    @PostMapping("/{id}/credentials")
     @PreAuthorize("hasRole('ADMIN') or (#id == authentication.details and hasRole('USER'))")
     public ResponseEntity<Map<String, String>> updateCredentials(@PathVariable Long id,
                                                                 @Valid @RequestBody UpdateCredentialsRequest request,

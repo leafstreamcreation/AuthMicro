@@ -1,4 +1,4 @@
-FROM maven:3.9.10-eclipse-temurin-21-alpine
+FROM maven:3.9.11-eclipse-temurin-21-alpine
 
 # Install curl for health check
 # RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*

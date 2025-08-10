@@ -42,8 +42,22 @@ public class AuthService {
 
         AuthUser user = userOptional.get();
         
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (user.getRole() == Role.ADMIN && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
+        }
+        else if (user.getRole() == Role.USER) {
+            user.getServiceCredentials()
+                    .stream()
+                    .filter(cred -> cred.getServiceName().equals(request.getServiceName()))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        cred -> {
+                            if (!passwordEncoder.matches(request.getPassword(), cred.getPasswordHash())) {
+                                throw new RuntimeException("Invalid credentials");
+                            }
+                        },
+                        () -> { throw new RuntimeException("Not registered for this service"); }
+                    );
         }
 
         if (user.has2FAEnabled()) {
@@ -78,6 +92,9 @@ public class AuthService {
     public AuthUser createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with this email already exists");
+        }
+        if (request.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) >= 1) {
+            throw new RuntimeException("Administrator already exists");
         }
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());

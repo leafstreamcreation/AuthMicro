@@ -26,7 +26,7 @@ A secure, CORS-enabled, Dockerized authentication API built with Java 11, Maven,
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using Docker Compose
 
 1. Clone the repository
 2. Create environment file from template:
@@ -37,19 +37,6 @@ A secure, CORS-enabled, Dockerized authentication API built with Java 11, Maven,
 4. Build and run:
    ```powershell
    docker-compose up --build
-   ```
-
-### Manual Setup
-
-1. Install Oracle 19c
-2. Configure database connection in `application.properties`
-3. Build the application:
-   ```powershell
-   mvn clean package
-   ```
-4. Run the application:
-   ```powershell
-   java -jar target/auth-micro-0.0.1-SNAPSHOT.jar
    ```
 
 ## API Endpoints
@@ -232,30 +219,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | `DB_USERNAME` | Database username | `admin` |
 | `DB_PASSWORD` | Database password | `secureDbPass` |
 
-## Building and Deployment
-
-### Build JAR
-```powershell
-mvn clean package
-```
-
-### Build Docker Image
-```powershell
-docker build -t auth-api:latest .
-```
-
-### Run with Docker Compose
-```powershell
-docker-compose up -d
-```
-
-## Testing
-
-Run unit tests:
-```powershell
-mvn test
-```
-
 ## Health Monitoring
 
 The application includes health check endpoints:
@@ -270,19 +233,3 @@ The application includes health check endpoints:
 4. **JWT Expiration**: Tokens expire in 1 hour by default
 5. **Password Hashing**: BCrypt with strength 12 for all passwords
 6. **2FA**: Enable TOTP-based two-factor authentication for enhanced security
-
-## Development
-
-### Prerequisites
-- Java 11+
-- Maven 3.6+
-- Oracle 19c (or Docker)
-
-### Local Development
-1. Start Oracle database (or use Docker Compose)
-2. Update `application.properties` with local settings
-3. Run: `mvn spring-boot:run`
-
-## License
-
-This project is licensed under the MIT License.
