@@ -34,6 +34,9 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
+        String serviceName = request.getServiceName();
+        Boolean isAuthLogin = serviceName.isEmpty();
+
         Optional<AuthUser> userOptional = userRepository.findByEmail(request.getEmail());
         
         if (userOptional.isEmpty() || !userOptional.get().isEnabled()) {
@@ -42,13 +45,13 @@ public class AuthService {
 
         AuthUser user = userOptional.get();
 
-        if (request.getServiceName() == "" && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid authr credentials");
+        if (isAuthLogin && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Invalid auth credentials");
         }
-        else {
+        else if (!isAuthLogin) {
             user.getServiceCredentials()
                     .stream()
-                    .filter(cred -> cred.getServiceName().equals(request.getServiceName()))
+                    .filter(cred -> cred.getServiceName().equals(serviceName))
                     .findFirst()
                     .ifPresentOrElse(
                         cred -> {
@@ -64,13 +67,14 @@ public class AuthService {
             return new LoginResponse(true, "TOTP verification required");
         }
 
-        String token = request.getServiceName() == ""
+        String token = isAuthLogin
                 ? jwtService.generateToken(user)
-                : jwtService.generateToken(user, request.getServiceName());
+                : jwtService.generateToken(user, serviceName);
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
     public LoginResponse verifyTotp(String email, TotpVerificationRequest request) {
+        String serviceName = request.getServiceName();
         Optional<AuthUser> userOptional = userRepository.findByEmail(email);
         
         if (userOptional.isEmpty() || !userOptional.get().isEnabled()) {
@@ -87,9 +91,9 @@ public class AuthService {
             throw new RuntimeException("Invalid TOTP code");
         }
 
-        String token = request.getServiceName() == ""
+        String token = serviceName.isEmpty()
                 ? jwtService.generateToken(user)
-                : jwtService.generateToken(user, request.getServiceName());
+                : jwtService.generateToken(user, serviceName);
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
