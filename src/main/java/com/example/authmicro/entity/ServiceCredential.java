@@ -1,8 +1,8 @@
 package com.example.authmicro.entity;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotBlank;
 
 @Embeddable
 public class ServiceCredential {

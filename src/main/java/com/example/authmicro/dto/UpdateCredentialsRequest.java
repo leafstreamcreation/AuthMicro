@@ -1,6 +1,6 @@
 package com.example.authmicro.dto;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 public class UpdateCredentialsRequest {
