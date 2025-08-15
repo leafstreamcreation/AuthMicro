@@ -32,6 +32,9 @@ public class SecurityConfig {
     @Value("${ALLOWED_ORIGINS:http://localhost:8059}")
     private String allowedOrigins;
 
+    @Value("${ALLOW_PRIVATE_NETWORK:false}")
+    private boolean allowPrivateNetwork;
+
     @Autowired
     public SecurityConfig(ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
                          JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -62,7 +65,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowPrivateNetwork(true);
+        configuration.setAllowPrivateNetwork(allowPrivateNetwork);
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
