@@ -44,6 +44,16 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<Response> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        try {
+            LoginResponse response = authService.refreshToken(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<Response> signup(@Valid @RequestBody CreateUserRequest request) {
         try {

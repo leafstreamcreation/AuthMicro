@@ -5,6 +5,9 @@ import com.example.authmicro.entity.AuthUser;
 import com.example.authmicro.entity.Role;
 import com.example.authmicro.entity.ServiceCredential;
 import com.example.authmicro.repository.AuthUserRepository;
+
+import oracle.net.aso.j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -71,6 +74,21 @@ public class AuthService {
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, serviceName);
         return new LoginResponse(token, jwtService.getExpirationTime());
+    }
+
+    public LoginResponse refreshToken(String token) {
+        if (jwtService.isTokenExpired(token)) {
+            throw new RuntimeException("Token is expired");
+        }
+        String email = jwtService.extractEmail(token);
+        AuthUser user = getUserByEmail(email);
+        String serviceName = jwtService.extractServiceName(token);
+        Boolean isAuthLogin = serviceName == null || serviceName.isEmpty();
+
+        String newToken = isAuthLogin
+                ? jwtService.generateToken(user)
+                : jwtService.generateToken(user, serviceName);
+        return new LoginResponse(newToken, jwtService.getExpirationTime());
     }
 
     public LoginResponse verifyTotp(String email, TotpVerificationRequest request) {
