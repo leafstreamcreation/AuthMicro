@@ -77,6 +77,9 @@ public class AuthService {
 
     public LoginResponse refreshToken(Long id, String name) {
         AuthUser user = getUserById(id);
+        if (!user.isEnabled()) {
+            throw new RuntimeException("User is disabled");
+        }
         String serviceName = name;
         Boolean isAuthLogin = serviceName == null || serviceName.isEmpty();
 
@@ -170,6 +173,17 @@ public class AuthService {
         userRepository.save(user);
         
         return totpService.generateQrCodeUrl(secret, user.getEmail(), "AuthMicro");
+    }
+
+    public void disable2FA(Long userId) {
+        AuthUser user = getUserById(userId);
+        
+        if (!user.has2FAEnabled()) {
+            throw new RuntimeException("2FA is not enabled for this user");
+        }
+
+        user.setTotpSecret(null);
+        userRepository.save(user);
     }
 
     public UserResponse convertToUserResponse(AuthUser user) {

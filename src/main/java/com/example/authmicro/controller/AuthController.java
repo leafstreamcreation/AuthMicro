@@ -48,8 +48,8 @@ public class AuthController {
     public ResponseEntity<Response> refresh(Authentication authentication) {
         
         try {
-            Long userId = ((RefreshAuthentication) authentication.getDetails()).getUserId();
-            String serviceName = ((RefreshAuthentication) authentication.getDetails()).getServiceName();
+            Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
+            String serviceName = ((AuthenticationDetails) authentication.getDetails()).getServiceName();
             LoginResponse response = authService.refreshToken(userId, serviceName);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -83,13 +83,29 @@ public class AuthController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> enable2FA(Authentication authentication) {
         try {
-            Long userId = (Long) authentication.getDetails();
+            Long userId = ( (AuthenticationDetails) authentication.getDetails()).getUserId();
             String qrCodeUrl = authService.enable2FA(userId);
             
             Map<String, String> response = new HashMap<>();
             response.put("qrCodeUrl", qrCodeUrl);
             response.put("message", "2FA enabled successfully");
             
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/2fa/disable")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> disable2FA(Authentication authentication) {
+        try {
+            Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
+            authService.disable2FA(userId);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "2FA disabled successfully");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
