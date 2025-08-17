@@ -6,7 +6,6 @@ import com.example.authmicro.entity.Role;
 import com.example.authmicro.entity.ServiceCredential;
 import com.example.authmicro.repository.AuthUserRepository;
 
-import oracle.net.aso.j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -76,13 +75,9 @@ public class AuthService {
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
-    public LoginResponse refreshToken(String token) {
-        if (jwtService.isTokenExpired(token)) {
-            throw new RuntimeException("Token is expired");
-        }
-        String email = jwtService.extractEmail(token);
-        AuthUser user = getUserByEmail(email);
-        String serviceName = jwtService.extractServiceName(token);
+    public LoginResponse refreshToken(Long id, String name) {
+        AuthUser user = getUserById(id);
+        String serviceName = name;
         Boolean isAuthLogin = serviceName == null || serviceName.isEmpty();
 
         String newToken = isAuthLogin

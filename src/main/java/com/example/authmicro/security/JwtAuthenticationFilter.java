@@ -1,5 +1,6 @@
 package com.example.authmicro.security;
 
+import com.example.authmicro.dto.RefreshAuthentication;
 import com.example.authmicro.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,13 +41,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtService.extractEmail(token);
                 String role = jwtService.extractRole(token);
                 Long userId = jwtService.extractUserId(token);
+                String serviceName = jwtService.extractServiceName(token);
                 
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
                 UsernamePasswordAuthenticationToken authentication = 
                     new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
                 
                 // Add user ID to authentication details
-                authentication.setDetails(userId);
+                authentication.setDetails(new RefreshAuthentication(userId, serviceName));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

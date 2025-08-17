@@ -45,9 +45,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Response> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<Response> refresh(Authentication authentication) {
+        
         try {
-            LoginResponse response = authService.refreshToken(request);
+            Long userId = ((RefreshAuthentication) authentication.getDetails()).getUserId();
+            String serviceName = ((RefreshAuthentication) authentication.getDetails()).getServiceName();
+            LoginResponse response = authService.refreshToken(userId, serviceName);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
