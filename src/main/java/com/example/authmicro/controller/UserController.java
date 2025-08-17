@@ -2,7 +2,6 @@ package com.example.authmicro.controller;
 
 import com.example.authmicro.dto.*;
 import com.example.authmicro.entity.AuthUser;
-import com.example.authmicro.entity.Role;
 import com.example.authmicro.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

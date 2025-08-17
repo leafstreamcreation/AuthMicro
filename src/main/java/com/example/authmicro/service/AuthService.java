@@ -164,16 +164,18 @@ public class AuthService {
 
     public AuthUser updateUserCredentials(Long id, UpdateCredentialsRequest request) {
         AuthUser user = getUserById(id);
-        
-        List<ServiceCredential> credentials = request.getServiceCredentials().stream()
-                .map(dto -> new ServiceCredential(
-                        dto.getServiceName(),
-                        passwordEncoder.encode(dto.getPassword())
-                ))
-                .collect(Collectors.toList());
-        
-        user.setServiceCredentials(credentials);
-        return userRepository.save(user);
+        if (user.getRole() == Role.USER) {
+            List<ServiceCredential> credentials = request.getServiceCredentials().stream()
+                    .map(dto -> new ServiceCredential(
+                            dto.getServiceName(),
+                            passwordEncoder.encode(dto.getPassword())
+                    ))
+                    .collect(Collectors.toList());
+            
+            user.setServiceCredentials(credentials);
+            return userRepository.save(user);
+        }
+        return user;
     }
 
     public String enable2FA(Long userId) {

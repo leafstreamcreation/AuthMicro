@@ -140,4 +140,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
+
+    @PostMapping("/credentials")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Response> updateCredentials(@Valid @RequestBody UpdateCredentialsRequest request,
+                                                      Authentication authentication) {
+        try {
+            Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
+            AuthUser updated = authService.updateUserCredentials(userId, request);
+            UserResponse response = authService.convertToUserResponse(updated);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
 }
