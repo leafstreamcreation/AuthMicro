@@ -1,10 +1,10 @@
 package com.example.authmicro.dto;
 
-public class RefreshAuthentication {
+public class AuthenticationDetails {
     private Long userId;
     private String serviceName;
 
-    public RefreshAuthentication(Long userId, String serviceName) {
+    public AuthenticationDetails(Long userId, String serviceName) {
         this.userId = userId;
         this.serviceName = serviceName;
     }

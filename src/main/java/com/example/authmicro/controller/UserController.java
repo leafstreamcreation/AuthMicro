@@ -30,7 +30,7 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Response> createUser(@Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<Response> createUser(@Valid @RequestBody UserBodyRequest request) {
         try {
             AuthUser user = authService.createUser(request);
             UserResponse response = authService.convertToUserResponse(user);

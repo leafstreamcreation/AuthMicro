@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class CreateUserRequest {
+public class UserBodyRequest {
     
     @Email
     @NotBlank
@@ -18,9 +18,9 @@ public class CreateUserRequest {
     
     private Role role = Role.USER;
 
-    public CreateUserRequest() {}
+    public UserBodyRequest() {}
 
-    public CreateUserRequest(String email, String password, Role role) {
+    public UserBodyRequest(String email, String password, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;

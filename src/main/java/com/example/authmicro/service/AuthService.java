@@ -113,7 +113,7 @@ public class AuthService {
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
-    public AuthUser createUser(CreateUserRequest request) {
+    public AuthUser createUser(UserBodyRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("User with this email already exists");
         }
@@ -124,6 +124,23 @@ public class AuthService {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         AuthUser user = new AuthUser(request.getEmail(), hashedPassword, request.getRole());
         
+        return userRepository.save(user);
+    }
+
+    public AuthUser updateUser(Long id, UserBodyRequest request) {
+        AuthUser user = getUserById(id);
+        
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already in use");
+        }
+
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        }
+
         return userRepository.save(user);
     }
 
@@ -192,7 +209,8 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole(),
                 user.has2FAEnabled(),
-                user.isEnabled()
+                user.isEnabled(),
+                user.getServiceCredentials()
         );
     }
 }

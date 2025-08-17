@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -58,7 +59,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Response> signup(@Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<Response> signup(@Valid @RequestBody UserBodyRequest request) {
         try {
             AuthUser user = authService.createUser(request);
             UserResponse response = authService.convertToUserResponse(user);
@@ -124,6 +125,20 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/profile")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Response> updateProfile(@Valid @RequestBody UserBodyRequest request,
+                                                  Authentication authentication) {
+        try {
+            Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
+            AuthUser updated = authService.updateUser(userId, request);
+            UserResponse response = authService.convertToUserResponse(updated);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 }
