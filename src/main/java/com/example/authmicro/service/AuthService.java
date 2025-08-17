@@ -129,13 +129,17 @@ public class AuthService {
 
     public AuthUser updateUser(Long id, UserBodyRequest request) {
         AuthUser user = getUserById(id);
-        
-        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email already in use");
+            }
+            user.setEmail(request.getEmail());
         }
 
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
@@ -156,12 +160,6 @@ public class AuthService {
     public AuthUser getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    public AuthUser updateUserRole(Long id, Role role) {
-        AuthUser user = getUserById(id);
-        user.setRole(role);
-        return userRepository.save(user);
     }
 
     public AuthUser updateUserCredentials(Long id, UpdateCredentialsRequest request) {
@@ -200,6 +198,12 @@ public class AuthService {
         }
 
         user.setTotpSecret(null);
+        userRepository.save(user);
+    }
+
+    public void toggleUserEnabled(Long userId) {
+        AuthUser user = getUserById(userId);
+        user.setEnabled(!user.isEnabled());
         userRepository.save(user);
     }
 

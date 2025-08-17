@@ -1,6 +1,6 @@
 package com.example.authmicro.security;
 
-import com.example.authmicro.dto.RefreshAuthentication;
+import com.example.authmicro.dto.AuthenticationDetails;
 import com.example.authmicro.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
                 
                 // Add user ID to authentication details
-                authentication.setDetails(new RefreshAuthentication(userId, serviceName));
+                authentication.setDetails(new AuthenticationDetails(userId, serviceName));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

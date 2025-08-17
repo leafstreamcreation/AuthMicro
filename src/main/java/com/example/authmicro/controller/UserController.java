@@ -56,12 +56,11 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{id}/role")
+    @PostMapping("/{id}/profile")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Response> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Response> updateUserProfile(@PathVariable Long id, @RequestBody UserBodyRequest request) {
         try {
-            Role role = Role.valueOf(request.get("role"));
-            AuthUser user = authService.updateUserRole(id, role);
+            AuthUser user = authService.updateUser(id, request);
             UserResponse response = authService.convertToUserResponse(user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -70,7 +69,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/credentials")
-    @PreAuthorize("hasRole('ADMIN') or (#id == authentication.details and hasRole('USER'))")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> updateCredentials(@PathVariable Long id,
                                                                 @Valid @RequestBody UpdateCredentialsRequest request,
                                                                 Authentication authentication) {
@@ -88,8 +87,8 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{id}/2fa")
-    @PreAuthorize("hasRole('ADMIN') or (#id == authentication.details and hasRole('USER'))")
+    @PostMapping("/{id}/2fa/enable")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> enable2FAForUser(@PathVariable Long id,
                                                                Authentication authentication) {
         try {
@@ -106,4 +105,36 @@ public class UserController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    @PostMapping("/{id}/2fa/disable")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> disable2FAForUser(@PathVariable Long id,
+                                                                Authentication authentication) {
+        try {
+            authService.disable2FA(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "2FA disabled successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/{id}/enabled")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> toggleUserEnabled(@PathVariable Long id) {
+        try {
+            authService.toggleUserEnabled(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "User enabled status updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
 }

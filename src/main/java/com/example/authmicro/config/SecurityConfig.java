@@ -3,7 +3,6 @@ package com.example.authmicro.config;
 import com.example.authmicro.security.ApiKeyAuthenticationFilter;
 import com.example.authmicro.security.JwtAuthenticationFilter;
 
-import oracle.security.o3logon.a;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
