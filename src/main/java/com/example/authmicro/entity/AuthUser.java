@@ -49,12 +49,16 @@ public class AuthUser {
     @Column(name = "enabled")
     private boolean enabled = true;
 
+    @Column(name = "last_login")
+    private String latest_login;
+
     public AuthUser() {}
 
     public AuthUser(String email, String passwordHash, Role role) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+        this.latest_login = null;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -147,14 +151,23 @@ public class AuthUser {
         return totpSecret != null && !totpSecret.isEmpty();
     }
 
+    public String getLatest_Login() {
+        return latest_login;
+    }
+
+    public void setLatest_Login(String JWT) {
+        this.latest_login = JWT;
+    }
+
     @Override
     public String toString() {
         return "AuthUser{" +
                 "id=" + id +
-                ", email='" + email + '\'' +
+                ", email=" + email +
                 ", role=" + role +
                 ", enabled=" + enabled +
                 ", has2FA=" + has2FAEnabled() +
+                ", last_login=" + latest_login +
                 '}';
     }
 }

@@ -119,4 +119,9 @@ public class JwtService {
     public long getExpirationTime() {
         return jwtExpiration / 1000; // Return in seconds
     }
+
+    public String extractLatestJWT(String token) {
+        Claims claims = extractAllClaims(token);
+        return (String) claims.get("latest_JWT");
+    }
 }

@@ -154,4 +154,17 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
+
+    // @PostMapping("/recover")
+    // public ResponseEntity<Response> recoverAccount(@Valid @RequestBody RecoverAccountRequest request,
+    //                                                Authentication authentication) {
+    //     try {
+    //         Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
+    //         AuthUser recovered = authService.recoverUserAccount(userId, request);
+    //         UserResponse response = authService.convertToUserResponse(recovered);
+    //         return ResponseEntity.ok(response);
+    //     } catch (RuntimeException e) {
+    //         return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+    //     }
+    // }
 }

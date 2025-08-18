@@ -37,7 +37,7 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         String serviceName = request.getServiceName();
-        Boolean isAuthLogin = serviceName.isEmpty();
+        Boolean isAdminLogin = serviceName.isEmpty() || serviceName == null;
 
         Optional<AuthUser> userOptional = userRepository.findByEmail(request.getEmail());
         
@@ -47,10 +47,10 @@ public class AuthService {
 
         AuthUser user = userOptional.get();
 
-        if (isAuthLogin && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (isAdminLogin && !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid auth credentials");
         }
-        else if (!isAuthLogin) {
+        else if (!isAdminLogin) {
             user.getServiceCredentials()
                     .stream()
                     .filter(cred -> cred.getServiceName().equals(serviceName))
@@ -69,9 +69,11 @@ public class AuthService {
             return new LoginResponse(true, "TOTP verification required");
         }
 
-        String token = isAuthLogin
+        String token = isAdminLogin
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, serviceName);
+        user.setLatest_Login(token);
+        userRepository.save(user);
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
