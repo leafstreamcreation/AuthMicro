@@ -156,16 +156,34 @@ public class AuthController {
         }
     }
 
-    // @PostMapping("/recover")
-    // public ResponseEntity<Response> recoverAccount(@Valid @RequestBody RecoverAccountRequest request,
-    //                                                Authentication authentication) {
-    //     try {
-    //         Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
-    //         AuthUser recovered = authService.recoverUserAccount(userId, request);
-    //         UserResponse response = authService.convertToUserResponse(recovered);
-    //         return ResponseEntity.ok(response);
-    //     } catch (RuntimeException e) {
-    //         return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-    //     }
-    // }
+    @PostMapping("/recover")
+    public ResponseEntity<Map<String, String>> recoverAccount(@Valid @RequestBody UserBodyRequest request) {
+        try {
+            authService.recoverUserAccount(request.getEmail());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Recovery email sent");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/recover/confirm")
+    public ResponseEntity<Map<String, String>> confirmRecovery(@Valid @RequestBody RecoveryRequest request) {
+        try {
+            authService.confirmUserRecovery(request.getEmail(), request.getToken(), request.getNewPassword());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Password updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
 }

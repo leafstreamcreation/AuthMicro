@@ -15,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
+
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
 
 @Service
 @Transactional
@@ -215,6 +221,52 @@ public class AuthService {
         AuthUser user = getUserById(userId);
         user.setEnabled(!user.isEnabled());
         userRepository.save(user);
+    }
+
+    public void recoverUserAccount(String email) {
+        AuthUser user = getUserByEmail(email);
+        
+        if (!user.isEnabled()) {
+            throw new RuntimeException("User account is disabled");
+        }
+        String token = UUID.randomUUID().toString();
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("${RECOVERY_URL:http://localhost:8080/recover}"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        String.format("{\"email\":\"%s\", \"recoveryToken\":\"%s\"}", email, token)))
+                .build();
+
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(response -> {
+                    if (response.statusCode() != 200) {
+                        throw new RuntimeException("Failed to send recovery email: " + response.body());
+                    } else {
+                        user.setRecoveryToken(token);
+                        userRepository.save(user);
+                    }
+                });
+    }
+
+    public LoginResponse confirmUserRecovery(String email, String recoveryToken, String newPassword) {
+        AuthUser user = getUserByEmail(email);
+        
+        if (!user.isEnabled()) {
+            throw new RuntimeException("User account is disabled");
+        }
+        if (user.getRecoveryToken() == null || !user.getRecoveryToken().equals(recoveryToken)) {
+            throw new RuntimeException("Invalid recovery token");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setRecoveryToken(null);
+        String token = jwtService.generateToken(user);
+        user.setLatest_Login(token);
+        userRepository.save(user);
+        
+        return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
     public UserResponse convertToUserResponse(AuthUser user) {

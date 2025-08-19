@@ -52,6 +52,9 @@ public class AuthUser {
     @Column(name = "last_login")
     private String latest_login;
 
+    @Column(name = "recovery_token")
+    private String recoveryToken;
+
     public AuthUser() {}
 
     public AuthUser(String email, String passwordHash, Role role) {
@@ -59,6 +62,7 @@ public class AuthUser {
         this.passwordHash = passwordHash;
         this.role = role;
         this.latest_login = null;
+        this.recoveryToken = null;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -157,6 +161,14 @@ public class AuthUser {
 
     public void setLatest_Login(String JWT) {
         this.latest_login = JWT;
+    }
+
+    public String getRecoveryToken() {
+        return recoveryToken;
+    }
+
+    public void setRecoveryToken(String recoveryToken) {
+        this.recoveryToken = recoveryToken;
     }
 
     @Override
