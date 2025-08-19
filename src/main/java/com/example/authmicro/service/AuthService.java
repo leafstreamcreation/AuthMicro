@@ -116,6 +116,8 @@ public class AuthService {
         String token = serviceName.isEmpty()
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, serviceName);
+        user.setLatest_Login(token);
+        userRepository.save(user);
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
