@@ -68,7 +68,6 @@ public class AuthService {
         if (user.has2FAEnabled()) {
             return new LoginResponse(true, "TOTP verification required");
         }
-
         String token = isAdminLogin
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, serviceName);
@@ -77,10 +76,13 @@ public class AuthService {
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
 
-    public LoginResponse refreshToken(Long id, String name) {
+    public LoginResponse refreshToken(Long id, String name, String token) {
         AuthUser user = getUserById(id);
         if (!user.isEnabled()) {
             throw new RuntimeException("User is disabled");
+        }
+        if (!user.getLatest_Login().equals(token)) {
+            throw new RuntimeException("Invalid token");
         }
         String serviceName = name;
         Boolean isAuthLogin = serviceName == null || serviceName.isEmpty();
@@ -88,6 +90,8 @@ public class AuthService {
         String newToken = isAuthLogin
                 ? jwtService.generateToken(user)
                 : jwtService.generateToken(user, serviceName);
+        user.setLatest_Login(newToken);
+        userRepository.save(user);
         return new LoginResponse(newToken, jwtService.getExpirationTime());
     }
 

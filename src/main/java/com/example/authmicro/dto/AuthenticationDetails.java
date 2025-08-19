@@ -3,12 +3,12 @@ package com.example.authmicro.dto;
 public class AuthenticationDetails {
     private Long userId;
     private String serviceName;
-    private String latest_JWT;
+    private String token;
 
-    public AuthenticationDetails(Long userId, String serviceName, String latest_JWT) {
+    public AuthenticationDetails(Long userId, String serviceName, String token) {
         this.userId = userId;
         this.serviceName = serviceName;
-        this.latest_JWT = latest_JWT;
+        this.token = token;
     }
 
     public Long getUserId() {
@@ -27,11 +27,11 @@ public class AuthenticationDetails {
         this.serviceName = serviceName;
     }
 
-    public String getLatest_JWT() {
-        return latest_JWT;
+    public String getToken() {
+        return token;
     }
 
-    public void setLatest_JWT(String latest_JWT) {
-        this.latest_JWT = latest_JWT;
+    public void setToken(String token) {
+        this.token = token;
     }
 };

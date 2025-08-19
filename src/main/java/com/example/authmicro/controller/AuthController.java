@@ -50,7 +50,8 @@ public class AuthController {
         try {
             Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
             String serviceName = ((AuthenticationDetails) authentication.getDetails()).getServiceName();
-            LoginResponse response = authService.refreshToken(userId, serviceName);
+            String token = ((AuthenticationDetails) authentication.getDetails()).getToken();
+            LoginResponse response = authService.refreshToken(userId, serviceName, token);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
