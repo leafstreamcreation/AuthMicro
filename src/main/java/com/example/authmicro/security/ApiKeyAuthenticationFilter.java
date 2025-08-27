@@ -3,6 +3,11 @@ package com.example.authmicro.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import java.util.Base64;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,9 +21,13 @@ import java.io.IOException;
 public class ApiKeyAuthenticationFilter implements Filter {
 
     private final String apiKeySecret;
+    private final String apiDecryptionKey;
+    private static final int GCM_TAG_LENGTH = 128;
 
-    public ApiKeyAuthenticationFilter(@Value("${app.api-key.secret}") String apiKeySecret) {
+    public ApiKeyAuthenticationFilter(@Value("${app.api-key.secret}") String apiKeySecret,
+                                       @Value("${app.api-key.decryption}") String apiDecryptionKey) {
         this.apiKeySecret = apiKeySecret;
+        this.apiDecryptionKey = apiDecryptionKey;
     }
 
     @Override
