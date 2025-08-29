@@ -48,25 +48,25 @@ public class ApiKeyAuthenticationFilter implements Filter {
 
         try {
             // Decrypt the API key
-            byte[] decodedKey = Base64.getDecoder().decode(apiDecryptionKey);
-            SecretKeySpec keySpec = new SecretKeySpec(decodedKey, "AES");
+            // byte[] decodedKey = Base64.getDecoder().decode(apiDecryptionKey);
+            // SecretKeySpec keySpec = new SecretKeySpec(decodedKey, "AES");
 
-            byte[] decodedApiKey = Base64.getDecoder().decode(apiKey);
-            byte[] iv = new byte[12];
-            System.arraycopy(decodedApiKey, 0, iv, 0, iv.length);
-            GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            // byte[] decodedApiKey = Base64.getDecoder().decode(apiKey);
+            // byte[] iv = new byte[12];
+            // System.arraycopy(decodedApiKey, 0, iv, 0, iv.length);
+            // GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
 
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec, gcmSpec);
-            byte[] decryptedBytes = cipher.doFinal(decodedApiKey, iv.length, decodedApiKey.length - iv.length);
-            String decryptedApiKey = new String(decryptedBytes);
+            // javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
+            // cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec, gcmSpec);
+            // byte[] decryptedBytes = cipher.doFinal(decodedApiKey, iv.length, decodedApiKey.length - iv.length);
+            // String decryptedApiKey = new String(decryptedBytes);
 
-            if (!apiKeySecret.equals(decryptedApiKey)) {
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                httpResponse.setContentType("application/json");
-                httpResponse.getWriter().write("{\"error\":\"Invalid or missing API key\"}");
-                return;
-            }
+            // if (!apiKeySecret.equals(decryptedApiKey)) {
+            //     httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            //     httpResponse.setContentType("application/json");
+            //     httpResponse.getWriter().write("{\"error\":\"Invalid or missing API key\"}");
+            //     return;
+            // }
         } catch (Exception e) {
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType("application/json");
