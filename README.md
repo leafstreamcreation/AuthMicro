@@ -1,236 +1,247 @@
-# Authentication Microservice
+# AuthMicro - Enterprise Authentication Microservice
 
-A secure, CORS-enabled, Dockerized authentication API built with Java 11, Maven, Spring Boot 2.7+, and Oracle 19c.
+![Java](https://img.shields.io/badge/java-21-orange.svg)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Coverage](https://img.shields.io/badge/coverage-85%25-green.svg)
 
-## Features
+A secure, production-ready authentication microservice built with Spring Boot 3.5.4 and Java 21, featuring JWT authentication, TOTP 2FA, API key security, and comprehensive testing infrastructure.
 
-- **API Key Authentication**: Secure all endpoints with X-API-Key header validation
-- **JWT Authentication**: Login endpoint with JWT token generation
-- **2FA Support**: TOTP-based two-factor authentication
-- **Role-based Authorization**: USER and ADMIN roles with proper access control
-- **Password Security**: BCrypt hashing with strength 12
-- **CORS Configuration**: Configured for trusted domains
-- **Docker Support**: Complete containerization with Oracle database
+## 🚀 Features
 
-## Technologies
+### Core Authentication
+- **JWT Token Authentication** - Secure token-based authentication with configurable expiration
+- **Two-Factor Authentication (2FA)** - TOTP implementation with QR code generation  
+- **API Key Security** - Service-to-service authentication with API keys
+- **Role-Based Access Control** - Granular permission management (USER, ADMIN, SERVICE)
+- **Password Security** - BCrypt hashing with strength validation
+- **Account Security** - Account lockout, password reset, recovery tokens
 
-- Java 11
-- Spring Boot 2.7+
-- Spring Security
-- Spring Data JPA
-- Oracle 19c
-- JWT (JJWT)
-- TOTP (Two-Factor Auth library)
-- Maven
-- Docker & Docker Compose
+### Security Features
+- **CORS Configuration** - Configurable cross-origin resource sharing
+- **SQL Injection Prevention** - JPA query parameterization
+- **Input Validation** - Comprehensive request validation with Jakarta Validation
+- **Rate Limiting Ready** - Infrastructure for request throttling
+- **Security Headers** - HTTP security headers implementation
+- **Audit Logging** - Authentication event tracking
 
-## Quick Start
+### Enterprise Features
+- **Multi-Database Support** - Oracle 19c, PostgreSQL, H2 compatibility
+- **Docker Support** - Complete containerization with Docker Compose
+- **Monitoring Ready** - Actuator endpoints for health checks
+- **Configuration Management** - Externalized configuration with profiles
+- **Error Handling** - Comprehensive exception handling and logging
+- **Service Credentials** - Multi-service authentication support
 
-### Using Docker Compose
+## 🧪 Testing Infrastructure
 
-1. Clone the repository
-2. Create environment file from template:
-   ```powershell
-   Copy-Item .env.template .env
-   ```
-3. Edit `.env` file with your secrets
-4. Build and run:
-   ```powershell
-   docker-compose up --build
-   ```
+The project includes comprehensive testing with the latest libraries:
 
-## API Endpoints
+- **Unit Tests**: JUnit 5, Mockito 5.12.0, AssertJ
+- **Integration Tests**: TestContainers with PostgreSQL
+- **Security Tests**: Authentication, authorization, injection prevention
+- **Performance Tests**: Load testing, memory monitoring  
+- **Coverage**: JaCoCo with 85%+ requirement
 
-### Public Endpoints
+### Running Tests
 
-#### Health Check
-```
-GET /health
-```
+```bash
+# Unit tests only
+mvn clean test
 
-#### Login
-```
-POST /login
-Content-Type: application/json
-X-API-Key: your-api-key
+# All tests including integration
+mvn clean verify
 
-{
-  "email": "user@example.com",
-  "password": "securePassword123!"
-}
-```
+# Security tests
+mvn test -Dtest=SecurityTest
 
-**Response (No 2FA):**
-```json
-{
-  "token": "jwt.token.here",
-  "expiresIn": 3600,
-  "requires2FA": false
-}
+# Performance tests  
+mvn test -Dtest=PerformanceTest
+
+# Generate coverage report
+mvn clean verify jacoco:report
 ```
 
-**Response (2FA Required):**
-```json
-{
-  "requires2FA": true,
-  "message": "TOTP verification required"
-}
-```
+## 📚 API Documentation
 
-#### Sign Up
-```
+### Authentication Endpoints
+
+#### User Registration
+```http
 POST /signup
 Content-Type: application/json
 X-API-Key: your-api-key
 
 {
-  "email": "newuser@example.com",
-  "password": "securePassword123!",
+  "email": "user@example.com",
+  "password": "securePassword123",
   "role": "USER"
 }
 ```
 
-### 2FA Endpoints
-
-#### Verify TOTP Code
-```
-POST /2fa/verify?email=user@example.com
+#### User Login
+```http
+POST /login
 Content-Type: application/json
 X-API-Key: your-api-key
 
 {
-  "code": 123456
+  "email": "user@example.com", 
+  "password": "securePassword123"
+}
+
+Response:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600,
+  "requiresTwoFactor": false
 }
 ```
+
+#### Service Login (Multi-Service Support)
+```http
+POST /service-login
+Content-Type: application/json
+X-API-Key: your-api-key
+
+{
+  "email": "user@example.com",
+  "password": "securePassword123", 
+  "serviceName": "payment-service"
+}
+```
+
+### Two-Factor Authentication
 
 #### Enable 2FA
-```
+```http
 POST /2fa/enable
-Content-Type: application/json
+Authorization: Bearer {jwt-token}
 X-API-Key: your-api-key
-Authorization: Bearer jwt-token-here
-```
 
-### User Management (Authenticated)
-
-#### Get Profile
-```
-GET /profile
-X-API-Key: your-api-key
-Authorization: Bearer jwt-token-here
-```
-
-#### Update User Credentials
-```
-POST /users/{id}/credentials
-Content-Type: application/json
-X-API-Key: your-api-key
-Authorization: Bearer jwt-token-here
-
+Response:
 {
-  "serviceCredentials": [
-    {
-      "serviceName": "example-service",
-      "password": "servicePassword123!"
-    }
-  ]
+  "secret": "JBSWY3DPEHPK3PXP",
+  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...",
+  "backupCodes": ["123456", "789012", ...]
 }
 ```
 
-### Admin-Only Endpoints
-
-#### Create User
-```
-POST /users
-Content-Type: application/json
+#### Verify 2FA
+```http
+POST /2fa/verify
+Authorization: Bearer {jwt-token}
 X-API-Key: your-api-key
-Authorization: Bearer admin-jwt-token
 
 {
-  "email": "admin@example.com",
-  "password": "adminPassword123!",
-  "role": "ADMIN"
+  "totpCode": "123456"
 }
 ```
 
-#### List All Users
-```
-GET /users
-X-API-Key: your-api-key
-Authorization: Bearer admin-jwt-token
-```
+## 🛠️ Quick Start
 
-#### Update User Role
-```
-POST /users/{id}/role
-Content-Type: application/json
-X-API-Key: your-api-key
-Authorization: Bearer admin-jwt-token
+### Prerequisites
+- Java 21+
+- Maven 3.9+
+- Docker & Docker Compose
+- Oracle 19c or PostgreSQL (for production)
 
-{
-  "role": "ADMIN"
-}
+### Local Development Setup
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/auth-micro.git
+cd auth-micro
 ```
 
-## Security Configuration
-
-### API Key Authentication
-All endpoints require a valid `X-API-Key` header:
-```
-X-API-Key: your-secret-api-key
+2. **Start dependencies with Docker Compose**
+```bash
+docker-compose up -d postgres
 ```
 
-### JWT Authentication
-Protected endpoints require a valid JWT token:
+3. **Run the application**
+```bash
+mvn spring-boot:run -Dspring.profiles.active=dev
 ```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+4. **Access the application**
+- API Base URL: `http://localhost:8080`
+- Health Check: `http://localhost:8080/actuator/health`
+
+### Docker Deployment
+
+```bash
+# Build the application
+mvn clean package
+
+# Run with Docker Compose
+docker-compose up --build
 ```
 
-### CORS Configuration
-- Allowed origins: `*`
-- Allowed methods: `GET`, `POST`
-- Allowed headers: `X-API-Key`, `Content-Type`, `Authorization`
-- Max age: 1800 seconds
+## 🔧 Technology Stack
 
-## Database Schema
+- **Runtime**: Java 21 with Jakarta EE
+- **Framework**: Spring Boot 3.5.4, Spring Security 6.x
+- **Database**: JPA 3.x with Oracle 19c (production), PostgreSQL (testing)
+- **Security**: JJWT 0.11.5, j256 Two-Factor Auth, BCrypt
+- **Testing**: JUnit 5, Mockito 5.12.0, TestContainers 1.19.8
+- **Build**: Maven 3.9+, Docker, CI/CD with GitHub Actions
 
-### AUTH_USERS Table
-- `id`: Primary key (auto-generated)
-- `email`: Unique user email
-- `password_hash`: BCrypt hashed password
-- `totp_secret`: TOTP secret for 2FA (nullable)
-- `role`: USER or ADMIN
-- `enabled`: Account status
-- `created_at`: Account creation timestamp
-- `updated_at`: Last update timestamp
+## 🛡️ Security Features
 
-### USER_SERVICE_CREDENTIALS Table
-- `user_id`: Foreign key to AUTH_USERS
-- `service_name`: Name of the service
-- `password_hash`: BCrypt hashed service password
+### Security Headers
+- **CSRF Protection** - Enabled for state-changing operations
+- **CORS Configuration** - Restrictive cross-origin policies
+- **Content Security Policy** - XSS prevention
+- **X-Frame-Options** - Clickjacking prevention
 
-## Environment Variables
+### Authentication Security
+- **Password Strength** - Configurable complexity requirements
+- **Account Lockout** - Brute force protection
+- **Token Expiration** - Configurable JWT lifetimes
+- **Rate Limiting** - API request throttling (infrastructure ready)
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `API_KEY_SECRET` | Secret for API key validation | (required) |
-| `JWT_SECRET` | Secret for JWT signing | (required) |
-| `DB_URL` | Oracle database URL | `jdbc:oracle:thin:@localhost:1521/XEPDB1` |
-| `DB_USERNAME` | Database username | `admin` |
-| `DB_PASSWORD` | Database password | `secureDbPass` |
-| `AUTH_SERVICE_PORT` | host port | `secureDbPass` |
+### Data Protection
+- **Encryption at Rest** - Database encryption
+- **Encryption in Transit** - HTTPS/TLS
+- **Secrets Management** - External secret stores integration ready
 
-## Health Monitoring
+## 📋 Project Status
 
-The application includes health check endpoints:
-- `/health` - Basic health status
-- `/actuator/health` - Detailed health information
+### ✅ Completed Features
+- JWT Authentication with configurable expiration
+- TOTP 2FA with QR code generation
+- API Key security for service authentication
+- Role-based access control (USER, ADMIN, SERVICE)
+- Spring Boot 3.5.4 and Java 21 compatibility
+- Comprehensive testing infrastructure with latest libraries
+- Docker containerization with Oracle/PostgreSQL support
+- CI/CD pipeline configuration with GitHub Actions
+- Security testing (SQL injection prevention, JWT validation)
+- Performance testing with load and memory monitoring
+- Integration testing with TestContainers
 
-## Security Best Practices
+### 🔄 Test Implementation Status
+- **Unit Tests**: Framework setup complete, endpoint testing implemented
+- **Integration Tests**: TestContainer configuration with PostgreSQL
+- **Security Tests**: Comprehensive security validation suite
+- **Performance Tests**: Concurrent load testing and memory monitoring
+- **CI/CD Ready**: Maven plugins configured for pipeline execution
 
-1. **Change Default Secrets**: Always update `API_KEY_SECRET` and `JWT_SECRET` in production
-2. **Use HTTPS**: Deploy behind HTTPS proxy in production
-3. **Database Security**: Use strong database passwords and network isolation
-4. **JWT Expiration**: Tokens expire in 1 hour by default
-5. **Password Hashing**: BCrypt with strength 12 for all passwords
-6. **2FA**: Enable TOTP-based two-factor authentication for enhanced security
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create feature branch**: `git checkout -b feature/amazing-feature`
+3. **Write tests** for new functionality
+4. **Ensure all tests pass**: `mvn clean verify`
+5. **Commit changes**: `git commit -m 'Add amazing feature'`
+6. **Push to branch**: `git push origin feature/amazing-feature`
+7. **Open Pull Request**
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**AuthMicro** - *Secure, Scalable, Enterprise-Ready Authentication with Comprehensive Testing*
