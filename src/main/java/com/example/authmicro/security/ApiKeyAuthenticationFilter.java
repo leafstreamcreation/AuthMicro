@@ -45,6 +45,8 @@ public class ApiKeyAuthenticationFilter implements Filter {
             return;
         }
 
+        // Continue with the request processing
+        // add API key decoding and validation
         chain.doFilter(request, response);
     }
 }
