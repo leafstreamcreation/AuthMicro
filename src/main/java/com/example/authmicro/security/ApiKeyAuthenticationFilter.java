@@ -14,9 +14,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @Component
 public class ApiKeyAuthenticationFilter implements Filter {
@@ -67,11 +74,11 @@ public class ApiKeyAuthenticationFilter implements Filter {
             return;
         }
         chain.doFilter(request, response);
-        } catch (javax.crypto.NoSuchPaddingException | java.security.NoSuchAlgorithmException e) {
+        } catch (NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Encryption error: " + e.getMessage() + "\"}");
         }
     }
 }
-}
+
