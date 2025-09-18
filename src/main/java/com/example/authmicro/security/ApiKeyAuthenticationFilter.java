@@ -49,12 +49,6 @@ public class ApiKeyAuthenticationFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         String requestPath = httpRequest.getRequestURI();
-        
-        // Skip API key validation for health endpoint
-        if ("/health".equals(requestPath) || "/actuator/health".equals(requestPath)) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         String inboundKey = httpRequest.getHeader("X-API-Key");
         byte[] nonceBytes = Arrays.copyOfRange(inboundKey.getBytes(), 0, 12);
