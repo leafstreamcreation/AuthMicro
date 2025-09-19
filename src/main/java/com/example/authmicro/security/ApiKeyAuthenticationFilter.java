@@ -1,5 +1,7 @@
 package com.example.authmicro.security;
 
+import com.example.authmicro.dto.CachedBodyHttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -44,11 +46,9 @@ public class ApiKeyAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
-        
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String requestPath = httpRequest.getRequestURI();
+        CachedBodyHttpServletRequest httpRequest = new CachedBodyHttpServletRequest((HttpServletRequest) request);
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         String inboundKey = httpRequest.getHeader("X-API-Key");
         byte[] nonceBytes = Arrays.copyOfRange(inboundKey.getBytes(), 0, 12);
