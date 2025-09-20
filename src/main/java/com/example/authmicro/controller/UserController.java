@@ -27,7 +27,7 @@ public class UserController {
         this.authService = authService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Response> createUser(@Valid @RequestBody UserBodyRequest request) {
         try {
@@ -39,7 +39,7 @@ public class UserController {
         }
     }
 
-    @GetMapping
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Response>> getAllUsers() {
         try {
