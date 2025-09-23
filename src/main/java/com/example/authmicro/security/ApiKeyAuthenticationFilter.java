@@ -51,7 +51,8 @@ public class ApiKeyAuthenticationFilter implements Filter {
 
         CachedBodyHttpServletRequest httpRequest = new CachedBodyHttpServletRequest((HttpServletRequest) request);
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-
+        // TODO: add logic for nonce and salt consolidated in the request header
+        
         String inboundKey = httpRequest.getHeader("X-API-Key");
         byte[] nonceBytes = Arrays.copyOfRange(inboundKey.getBytes(), 0, 12);
         byte[] inboundCipherText = Arrays.copyOfRange(inboundKey.getBytes(), 12, inboundKey.length());
