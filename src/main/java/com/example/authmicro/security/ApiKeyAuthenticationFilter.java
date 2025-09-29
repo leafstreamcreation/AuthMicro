@@ -1,7 +1,5 @@
 package com.example.authmicro.security;
 
-import com.example.authmicro.dto.CachedBodyHttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,19 +13,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.interfaces.PBEKey;
 import javax.crypto.IllegalBlockSizeException;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.security.spec.InvalidKeySpecException;
 
 @Component
 public class ApiKeyAuthenticationFilter implements Filter {
@@ -35,13 +35,22 @@ public class ApiKeyAuthenticationFilter implements Filter {
     private final String apiKeySecret;
     private final String apiKeyCipher;
     private final Integer gcmTagLength; // in bits
+    private final Integer saltLength; // in bytes
+    private final Integer nonceLength; // in bytes
+    private final Integer iterationCount; // PBKDF2 iteration count
 
     public ApiKeyAuthenticationFilter(@Value("${app.api-key.secret}") String apiKeySecret,
                                        @Value("${app.api-key.cipher}") String apiKeyCipher,
-                                       @Value("${app.api-key.gcm-tag-length}") Integer gcmTagLength) {
+                                       @Value("${app.api-key.gcm-tag-length}") Integer gcmTagLength,
+                                       @Value("${app.api-key.salt-length}") Integer saltLength,
+                                       @Value("${app.api-key.nonce-length}") Integer nonceLength,
+                                       @Value("${app.api-key.iteration-count}") Integer iterationCount) {
         this.apiKeySecret = apiKeySecret;
         this.apiKeyCipher = apiKeyCipher;
         this.gcmTagLength = gcmTagLength;
+        this.saltLength = saltLength;
+        this.nonceLength = nonceLength;
+        this.iterationCount = iterationCount;
     }
 
     @Override
@@ -49,19 +58,27 @@ public class ApiKeyAuthenticationFilter implements Filter {
             throws IOException, ServletException {
         try {
 
-        CachedBodyHttpServletRequest httpRequest = new CachedBodyHttpServletRequest((HttpServletRequest) request);
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        // TODO: add logic for nonce and salt consolidated in the request header
-        
-        String inboundKey = httpRequest.getHeader("X-API-Key");
-        byte[] nonceBytes = Arrays.copyOfRange(inboundKey.getBytes(), 0, 12);
-        byte[] inboundCipherText = Arrays.copyOfRange(inboundKey.getBytes(), 12, inboundKey.length());
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        SecretKeySpec keySpec = new SecretKeySpec(apiKeySecret.getBytes(), "AES");
+        String base64KeyString = httpRequest.getHeader("X-API-Key");
+        byte[] inboundKey = Base64.getDecoder().decode(base64KeyString);
+
+        int saltByteStart = inboundKey.length - saltLength;
+        int nonceByteStart = saltByteStart - nonceLength;
+
+        byte[] inboundCipherText = Arrays.copyOfRange(inboundKey, 0, nonceByteStart);
+        byte[] nonceBytes = Arrays.copyOfRange(inboundKey, nonceByteStart, saltByteStart);
+        byte[] saltBytes = Arrays.copyOfRange(inboundKey, saltByteStart, inboundKey.length);
+
+        Cipher cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        // Derive key using PBKDF2
+        PBEKeySpec keySpec = new PBEKeySpec(apiKeySecret.toCharArray(), saltBytes, iterationCount, 256);
+        PBEKey key = (PBEKey) keyFactory.generateSecret(keySpec);
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(gcmTagLength, nonceBytes);
 
-        cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmParameterSpec);
+        cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
         byte[] decryptedKeyBytes = cipher.doFinal(inboundCipherText);
         String decryptedKeyText = new String(decryptedKeyBytes, StandardCharsets.UTF_8);
         if (inboundKey == null || !apiKeyCipher.equals(decryptedKeyText)) {
@@ -71,7 +88,7 @@ public class ApiKeyAuthenticationFilter implements Filter {
             return;
         }
         chain.doFilter(request, response);
-        } catch (NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+        } catch ( InvalidKeySpecException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Encryption error: " + e.getMessage() + "\"}");
