@@ -26,7 +26,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/health")
+    @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         Map<String, String> status = new HashMap<>();
         status.put("status", "UP");
@@ -115,7 +115,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/profile")
+    @GetMapping("/profile")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Response> getProfile(Authentication authentication) {
         try {
@@ -128,7 +128,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/profile/update")
+    @PostMapping("/profile")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Response> updateProfile(@Valid @RequestBody UserBodyRequest request,
                                                   Authentication authentication) {
