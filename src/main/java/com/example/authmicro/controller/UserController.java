@@ -86,24 +86,24 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{id}/2fa/enable")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> enable2FAForUser(@PathVariable Long id,
-                                                               Authentication authentication) {
-        try {
-            String qrCodeUrl = authService.enable2FA(id);
+    // @PostMapping("/{id}/2fa/enable")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, String>> enable2FAForUser(@PathVariable Long id,
+    //                                                            Authentication authentication) {
+    //     try {
+    //         String qrCodeUrl = authService.enable2FA(id);
             
-            Map<String, String> response = new HashMap<>();
-            response.put("qrCodeUrl", qrCodeUrl);
-            response.put("message", "2FA enabled successfully");
+    //         Map<String, String> response = new HashMap<>();
+    //         response.put("qrCodeUrl", qrCodeUrl);
+    //         response.put("message", "2FA enabled successfully");
             
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
-    }
+    //         return ResponseEntity.ok(response);
+    //     } catch (RuntimeException e) {
+    //         Map<String, String> error = new HashMap<>();
+    //         error.put("error", e.getMessage());
+    //         return ResponseEntity.badRequest().body(error);
+    //     }
+    // }
 
     @PostMapping("/{id}/2fa/disable")
     @PreAuthorize("hasRole('ADMIN')")
