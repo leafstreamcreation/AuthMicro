@@ -101,10 +101,10 @@ public class AuthService {
         return new LoginResponse(newToken, jwtService.getExpirationTime());
     }
 
-    public LoginResponse verifyTotp(String email, TotpVerificationRequest request) {
+    public LoginResponse verifyTotp(TotpVerificationRequest request) {
         String serviceName = request.getServiceName();
-        Optional<AuthUser> userOptional = userRepository.findByEmail(email);
-        
+        Optional<AuthUser> userOptional = userRepository.findByEmail(request.getEmail());
+
         if (userOptional.isEmpty() || !userOptional.get().isEnabled()) {
             throw new RuntimeException("User not found");
         }

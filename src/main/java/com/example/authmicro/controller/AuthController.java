@@ -67,13 +67,12 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
-    }
+    
 
     @PostMapping("/2fa/verify")
-    public ResponseEntity<Response> verify2FA(@Valid @RequestBody TotpVerificationRequest request,
-                                                  @RequestParam String email) {
+    public ResponseEntity<Response> verify2FA(@Valid @RequestBody TotpVerificationRequest request) {
         try {
-            LoginResponse response = authService.verifyTotp(email, request);
+            LoginResponse response = authService.verifyTotp(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
