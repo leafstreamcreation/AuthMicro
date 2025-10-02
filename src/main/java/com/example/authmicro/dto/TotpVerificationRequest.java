@@ -1,5 +1,6 @@
 package com.example.authmicro.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
 public class TotpVerificationRequest {
@@ -7,6 +8,7 @@ public class TotpVerificationRequest {
     @NotNull
     private Integer code;
 
+    @Email
     @NotNull
     private String email;
 
