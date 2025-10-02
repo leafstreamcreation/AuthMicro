@@ -67,7 +67,7 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
-    
+    }
 
     @PostMapping("/2fa/verify")
     public ResponseEntity<Response> verify2FA(@Valid @RequestBody TotpVerificationRequest request) {
