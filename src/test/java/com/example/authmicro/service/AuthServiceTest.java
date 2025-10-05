@@ -144,7 +144,7 @@ class AuthServiceTest {
     void shouldSuccessfullyVerifyTotp() {
         // Given
         testUser.setTotpSecret("TESTSECRET123456");
-        TotpVerificationRequest request = new TotpVerificationRequest(123456);
+        TotpVerificationRequest request = new TotpVerificationRequest(123456, "test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(totpService.validateTotp("TESTSECRET123456", 123456)).thenReturn(true);
         when(jwtService.generateToken(testUser)).thenReturn("jwt-token");
@@ -152,7 +152,7 @@ class AuthServiceTest {
         when(userRepository.save(testUser)).thenReturn(testUser);
 
         // When
-        LoginResponse response = authService.verifyTotp("test@example.com", request);
+        LoginResponse response = authService.verifyTotp(request);
 
         // Then
         assertThat(response.getToken()).isEqualTo("jwt-token");
@@ -168,12 +168,12 @@ class AuthServiceTest {
     void shouldThrowExceptionForInvalidTotpCode() {
         // Given
         testUser.setTotpSecret("TESTSECRET123456");
-        TotpVerificationRequest request = new TotpVerificationRequest(999999);
+        TotpVerificationRequest request = new TotpVerificationRequest(999999, "test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(totpService.validateTotp("TESTSECRET123456", 999999)).thenReturn(false);
 
         // When & Then
-        assertThatThrownBy(() -> authService.verifyTotp("test@example.com", request))
+        assertThatThrownBy(() -> authService.verifyTotp(request))
             .isInstanceOf(RuntimeException.class)
             .hasMessage("Invalid TOTP code");
     }

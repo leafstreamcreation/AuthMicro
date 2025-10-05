@@ -169,9 +169,9 @@ class AuthControllerTest {
     @DisplayName("2FA verification with valid code should return JWT")
     void twoFAVerificationWithValidCodeShouldReturnJWT() throws Exception {
         // Given
-        TotpVerificationRequest request = new TotpVerificationRequest(123456);
+        TotpVerificationRequest request = new TotpVerificationRequest(123456, "test@example.com");
         LoginResponse response = new LoginResponse("jwt-token", 3600L);
-        when(authService.verifyTotp(eq("test@example.com"), any(TotpVerificationRequest.class)))
+        when(authService.verifyTotp(eq(request)))
                 .thenReturn(response);
 
         // When & Then
@@ -186,15 +186,15 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("jwt-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600));
 
-        verify(authService).verifyTotp(eq("test@example.com"), any(TotpVerificationRequest.class));
+        verify(authService).verifyTotp(eq(request));
     }
 
     @Test
     @DisplayName("2FA verification with invalid code should return bad request")
     void twoFAVerificationWithInvalidCodeShouldReturnBadRequest() throws Exception {
         // Given
-        TotpVerificationRequest request = new TotpVerificationRequest(999999);
-        when(authService.verifyTotp(eq("test@example.com"), any(TotpVerificationRequest.class)))
+        TotpVerificationRequest request = new TotpVerificationRequest(999999, "test@example.com");
+        when(authService.verifyTotp(eq(request)))
                 .thenThrow(new RuntimeException("Invalid TOTP code"));
 
         // When & Then
@@ -206,7 +206,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(authService).verifyTotp(eq("test@example.com"), any(TotpVerificationRequest.class));
+        verify(authService).verifyTotp(eq(request));
     }
 
     @Test
