@@ -21,36 +21,36 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.interfaces.PBEKey;
+// import javax.crypto.interfaces.PBEKey;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 @Component
 public class ApiKeyAuthenticationFilter implements Filter {
 
-    private final String apiKeySecret;
-    private final String apiKeyCipher;
-    private final Integer gcmTagLength; // in bits
-    private final Integer saltLength; // in bytes
-    private final Integer nonceLength; // in bytes
-    private final Integer iterationCount; // PBKDF2 iteration count
-
-    public ApiKeyAuthenticationFilter(@Value("${app.api-key.secret}") String apiKeySecret,
-                                       @Value("${app.api-key.cipher}") String apiKeyCipher,
-                                       @Value("${app.api-key.gcm-tag-length}") Integer gcmTagLength,
-                                       @Value("${app.api-key.salt-length}") Integer saltLength,
-                                       @Value("${app.api-key.nonce-length}") Integer nonceLength,
-                                       @Value("${app.api-key.iteration-count}") Integer iterationCount) {
-        this.apiKeySecret = apiKeySecret;
-        this.apiKeyCipher = apiKeyCipher;
-        this.gcmTagLength = gcmTagLength;
-        this.saltLength = saltLength;
-        this.nonceLength = nonceLength;
-        this.iterationCount = iterationCount;
+    @Value("${app.api-key.secret:secret123}")
+    private String apiKeySecret;
+    @Value("${app.api-key.cipher:ciphertext123}")
+    private String apiKeyCipher;
+    @Value("${app.api-key.gcm-tag-length:128}")
+    private Integer gcmTagLength; // in bits
+    @Value("${app.api-key.salt-length:16}")
+    private Integer saltLength; // in bytes
+    @Value("${app.api-key.nonce-length:12}")
+    private Integer nonceLength; // in bytes
+    @Value("${app.api-key.iteration-count:100000}")
+    private Integer iterationCount; // PBKDF2 iteration count
+    
+    public ApiKeyAuthenticationFilter() {
     }
 
     @Override
@@ -75,10 +75,11 @@ public class ApiKeyAuthenticationFilter implements Filter {
         SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         // Derive key using PBKDF2
         PBEKeySpec keySpec = new PBEKeySpec(apiKeySecret.toCharArray(), saltBytes, iterationCount, 256);
-        PBEKey key = (PBEKey) keyFactory.generateSecret(keySpec);
+        SecretKey key =  keyFactory.generateSecret(keySpec);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key.getEncoded(), "AES");
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(gcmTagLength, nonceBytes);
 
-        cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, gcmParameterSpec);
         byte[] decryptedKeyBytes = cipher.doFinal(inboundCipherText);
         String decryptedKeyText = new String(decryptedKeyBytes, StandardCharsets.UTF_8);
         if (inboundKey == null || !apiKeyCipher.equals(decryptedKeyText)) {

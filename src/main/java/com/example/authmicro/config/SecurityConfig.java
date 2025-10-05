@@ -7,7 +7,6 @@ import com.example.authmicro.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,7 +28,7 @@ public class SecurityConfig {
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${ALLOWED_ORIGINS:http://localhost:8059}")
+    @Value("${ALLOWED_ORIGINS:http://localhost:8060}")
     private String allowedOrigins;
 
     @Value("${ALLOW_PRIVATE_NETWORK:false}")
@@ -43,38 +42,33 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(1)
     public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health", "/actuator/health").permitAll()
-                .requestMatchers("/login", "/signup").permitAll()
-                .requestMatchers("/2fa/verify").permitAll()
-                .requestMatchers("/recover").permitAll()
-                .requestMatchers("/recover/**").permitAll()
-            )
-            .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .securityMatchers((matchers) -> matchers.requestMatchers("/health",
+        "/actuator/health",
+        "/login",
+        "/signup",
+        "/2fa/verify",
+        "/recover",
+        "/recover/**"))
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
+        )
+        .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    @Order(2)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/2fa/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/profile").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/refresh").hasAnyRole("USER", "ADMIN")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 
