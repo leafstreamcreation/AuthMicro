@@ -7,19 +7,40 @@ import com.example.authmicro.entity.ServiceCredential;
 import com.example.authmicro.repository.AuthUserRepository;
 
 
+import com.example.authmicro.config.ApiKeyProperties;
+import com.example.authmicro.config.EmailProperties;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.UUID;
+import java.util.Base64;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
+
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.SecureRandom;
 
 @Service
 @Transactional
@@ -29,14 +50,20 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final TotpService totpService;
+    private final EmailProperties emailProperties;
+    private final ApiKeyProperties apiKeyProperties;
 
     public AuthService(AuthUserRepository userRepository, 
                       JwtService jwtService, 
-                      TotpService totpService) {
+                      TotpService totpService,
+                      EmailProperties emailProperties,
+                      ApiKeyProperties apiKeyProperties) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder(12);
         this.jwtService = jwtService;
         this.totpService = totpService;
+        this.emailProperties = emailProperties;
+        this.apiKeyProperties = apiKeyProperties;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -227,21 +254,32 @@ public class AuthService {
         if (!user.isEnabled()) {
             throw new RuntimeException("User account is disabled");
         }
+        
+        String XAPIKey = createXAPIKey();
         String token = UUID.randomUUID().toString();
-
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("${RECOVERY_URL:http://localhost:8080/recover}"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(
-                        String.format("{\"email\":\"%s\", \"recoveryToken\":\"%s\"}", email, token)))
-                .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenAccept(response -> {
-                    if (response.statusCode() != 200) {
-                        throw new RuntimeException("Failed to send recovery email: " + response.body());
-                    } else {
+        .uri(URI.create("${RECOVERY_URL:http://localhost:8080/recover}"))
+        .header("Content-Type", "application/json")
+        .header("X-API-Key", XAPIKey)
+        .POST(HttpRequest.BodyPublishers.ofString(
+            String.format("""
+                {
+                    "destination":"%s", 
+                    "senderEmail":"%s", 
+                    "replyTo":"%s", 
+                    "subject":"Recover your account", 
+                    "text":"Please navigate to the recovery page and provide your email and code %d to recover your account", 
+                    "html":"Please navigate to the recovery page and provide your email and code %d to recover your account"
+                }
+                """, email, emailProperties.getFrom(), emailProperties.getReplyTo(), token, token)))
+            .build();
+            
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+            .thenAccept(response -> {
+                if (response.statusCode() != 200) {
+                    throw new RuntimeException("Failed to send recovery email: " + response.body());
+                } else {
                         user.setRecoveryToken(token);
                         userRepository.save(user);
                     }
@@ -276,5 +314,42 @@ public class AuthService {
                 user.isEnabled(),
                 user.getServiceCredentials()
         );
+    }
+
+    private String createXAPIKey() {
+        //create nonce
+        byte[] nonce = new byte[apiKeyProperties.getNonceLength()];
+        new SecureRandom().nextBytes(nonce);
+
+        //create salt
+        byte[] salt = new byte[apiKeyProperties.getSaltLength()];
+        new SecureRandom().nextBytes(salt);
+
+        try {
+        //create pbkdf2 key from apiKeySecret, salt and iterationCount
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        PBEKeySpec keySpec = new PBEKeySpec(apiKeyProperties.getSecret().toCharArray(), salt, apiKeyProperties.getIterationCount(), 256);
+        SecretKey pbkdf2Key = keyFactory.generateSecret(keySpec);
+
+        //generate AES key from pbkdf2 key
+        SecretKeySpec secretKeySpec = new SecretKeySpec(pbkdf2Key.getEncoded(), "AES");
+        //generate GCMParameterSpec from nonce
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(apiKeyProperties.getGcmTagLength(), nonce);
+
+        //generate cipher from AES key and GCMParameterSpec
+        Cipher cipher = Cipher.getInstance("AES_256/GCM/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmParameterSpec);
+
+        //combine cipher, nonce, and salt and return base64 encoded string
+
+        byte[] cipherText = cipher.doFinal(apiKeyProperties.getCipher().getBytes());
+        byte[] fullKey = new byte[cipherText.length + nonce.length + salt.length];
+        System.arraycopy(cipherText, 0, fullKey, 0, cipherText.length);
+        System.arraycopy(nonce, 0, fullKey, cipherText.length, nonce.length);
+        System.arraycopy(salt, 0, fullKey, cipherText.length + nonce.length, salt.length);
+        return Base64.getEncoder().encodeToString(fullKey);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+        throw new RuntimeException("Failed to create API key", e);
+    }
     }
 }

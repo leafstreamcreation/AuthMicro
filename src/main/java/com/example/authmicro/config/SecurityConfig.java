@@ -4,7 +4,6 @@ import com.example.authmicro.security.ApiKeyAuthenticationFilter;
 import com.example.authmicro.security.JwtAuthenticationFilter;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -34,7 +33,6 @@ public class SecurityConfig {
     @Value("${ALLOW_PRIVATE_NETWORK:false}")
     private boolean allowPrivateNetwork;
 
-    @Autowired
     public SecurityConfig(ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
                          JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.apiKeyAuthenticationFilter = apiKeyAuthenticationFilter;

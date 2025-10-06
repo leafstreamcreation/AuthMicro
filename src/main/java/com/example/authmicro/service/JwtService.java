@@ -1,9 +1,9 @@
 package com.example.authmicro.service;
 
 import com.example.authmicro.entity.AuthUser;
+import com.example.authmicro.config.JWTAuthProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -17,10 +17,9 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long jwtExpiration;
 
-    public JwtService(@Value("${app.jwt.secret}") String secret,
-                     @Value("${app.jwt.expiration}") long jwtExpiration) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
-        this.jwtExpiration = jwtExpiration;
+    public JwtService(JWTAuthProperties jwtAuthProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtAuthProperties.getSecret().getBytes());
+        this.jwtExpiration = jwtAuthProperties.getExpiration();
     }
 
     public String generateToken(AuthUser user) {

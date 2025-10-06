@@ -1,6 +1,7 @@
 package com.example.authmicro.security;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.example.authmicro.config.ApiKeyProperties;
+
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.Filter;
@@ -33,20 +34,20 @@ import java.security.spec.InvalidKeySpecException;
 @Component
 public class ApiKeyAuthenticationFilter implements Filter {
 
-    @Value("${app.api-key.secret:secret123}")
     private String apiKeySecret;
-    @Value("${app.api-key.cipher:ciphertext123}")
     private String apiKeyCipher;
-    @Value("${app.api-key.gcm-tag-length:128}")
     private Integer gcmTagLength; // in bits
-    @Value("${app.api-key.salt-length:16}")
     private Integer saltLength; // in bytes
-    @Value("${app.api-key.nonce-length:12}")
     private Integer nonceLength; // in bytes
-    @Value("${app.api-key.iteration-count:100000}")
     private Integer iterationCount; // PBKDF2 iteration count
     
-    public ApiKeyAuthenticationFilter() {
+    public ApiKeyAuthenticationFilter(ApiKeyProperties apiKeyProperties) {
+        this.apiKeySecret = apiKeyProperties.getSecret();
+        this.apiKeyCipher = apiKeyProperties.getCipher();
+        this.gcmTagLength = apiKeyProperties.getGcmTagLength();
+        this.saltLength = apiKeyProperties.getSaltLength();
+        this.nonceLength = apiKeyProperties.getNonceLength();
+        this.iterationCount = apiKeyProperties.getIterationCount();
     }
 
     @Override
