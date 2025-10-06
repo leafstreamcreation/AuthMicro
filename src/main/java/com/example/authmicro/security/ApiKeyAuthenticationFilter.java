@@ -21,7 +21,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
-// import javax.crypto.interfaces.PBEKey;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKey;
@@ -30,9 +29,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 @Component
 public class ApiKeyAuthenticationFilter implements Filter {

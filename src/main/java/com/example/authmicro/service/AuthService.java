@@ -7,7 +7,6 @@ import com.example.authmicro.entity.ServiceCredential;
 import com.example.authmicro.repository.AuthUserRepository;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final TotpService totpService;
 
-    @Autowired
     public AuthService(AuthUserRepository userRepository, 
                       JwtService jwtService, 
                       TotpService totpService) {

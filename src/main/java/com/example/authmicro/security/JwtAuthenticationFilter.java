@@ -2,7 +2,6 @@ package com.example.authmicro.security;
 
 import com.example.authmicro.dto.AuthenticationDetails;
 import com.example.authmicro.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +20,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
-    @Autowired
     public JwtAuthenticationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
