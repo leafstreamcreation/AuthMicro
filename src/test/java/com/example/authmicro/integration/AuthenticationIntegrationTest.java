@@ -6,6 +6,7 @@ import com.example.authmicro.entity.Role;
 import com.example.authmicro.repository.AuthUserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,13 @@ class AuthenticationIntegrationTest {
         testUser.setEnabled(true);
         testUser = userRepository.save(testUser);
     }
+    
+    @AfterAll
+static void cleanup() {
+    if (postgres != null) {
+        postgres.close();
+    }
+}
 
     @Test
     @DisplayName("Full authentication flow should work end-to-end")

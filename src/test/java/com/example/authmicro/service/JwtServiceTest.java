@@ -1,5 +1,6 @@
 package com.example.authmicro.service;
 
+import com.example.authmicro.config.JWTAuthProperties;
 import com.example.authmicro.entity.AuthUser;
 import com.example.authmicro.entity.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,12 @@ class JwtServiceTest {
     void setUp() {
         String secret = "test-jwt-secret-for-testing-purposes-only-must-be-long-enough";
         long expiration = 3600000L; // 1 hour
-        jwtService = new JwtService(secret, expiration);
+        
+        JWTAuthProperties jwtAuthProperties = new JWTAuthProperties();
+        jwtAuthProperties.setSecret(secret);
+        jwtAuthProperties.setExpiration(expiration);
+        
+        jwtService = new JwtService(jwtAuthProperties);
         
         testUser = new AuthUser();
         ReflectionTestUtils.setField(testUser, "id", 1L);
@@ -153,10 +159,11 @@ class JwtServiceTest {
     @DisplayName("Should detect expired token")
     void shouldDetectExpiredToken() {
         // Given - Create service with short expiration
-        JwtService shortExpirationService = new JwtService(
-            "test-jwt-secret-for-testing-purposes-only-must-be-long-enough", 
-            1L // 1 millisecond
-        );
+        JWTAuthProperties shortExpirationProps = new JWTAuthProperties();
+        shortExpirationProps.setSecret("test-jwt-secret-for-testing-purposes-only-must-be-long-enough");
+        shortExpirationProps.setExpiration(1L); // 1 millisecond
+        
+        JwtService shortExpirationService = new JwtService(shortExpirationProps);
         String token = shortExpirationService.generateToken(testUser);
 
         // Wait for token to expire

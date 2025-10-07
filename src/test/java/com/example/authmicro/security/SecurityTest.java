@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -199,11 +200,11 @@ class SecurityTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String validToken = loginResult.getResponse().getHeader("Authorization");
-        
-        // Tamper with the token
-        String tamperedToken = validToken.substring(0, validToken.length() - 5) + "TAMPE";
-
+                String validToken = loginResult.getResponse().getHeader("Authorization");
+                assertThat(validToken).isNotNull().as("JWT token should be present in Authorization header");
+                
+                // Tamper with the token
+                String tamperedToken = validToken.substring(0, validToken.length() - 5) + "TAMPE";
         // Try to access protected endpoint with tampered token
         mockMvc.perform(get("/profile")
                 .header("Authorization", tamperedToken)
