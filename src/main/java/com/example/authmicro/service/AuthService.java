@@ -270,9 +270,9 @@ public class AuthService {
                     "replyTo":"%s", 
                     "subject":"Recover your account", 
                     "text":"Please navigate to the recovery page and provide your email and code %d to recover your account", 
-                    "html":"Please navigate to the recovery page and provide your email and code %d to recover your account"
+                    "html":"Please navigate to the recovery page and provide your email and code %4$d to recover your account"
                 }
-                """, email, emailProperties.getFrom(), emailProperties.getReplyTo(), token, token)))
+                """, email, emailProperties.getFrom(), emailProperties.getReplyTo(), token)))
             .build();
             
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
