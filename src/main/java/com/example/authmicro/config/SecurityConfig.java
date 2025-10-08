@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.example.authmicro.config.CORSProperties;
+
 import java.util.Arrays;
 
 @Configuration
@@ -26,17 +28,14 @@ public class SecurityConfig {
 
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Value("${ALLOWED_ORIGINS:http://localhost:8060}")
-    private String allowedOrigins;
-
-    @Value("${ALLOW_PRIVATE_NETWORK:false}")
-    private boolean allowPrivateNetwork;
+    private final CORSProperties corsProperties;
 
     public SecurityConfig(ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
-                         JwtAuthenticationFilter jwtAuthenticationFilter) {
+                         JwtAuthenticationFilter jwtAuthenticationFilter,
+                         CORSProperties corsProperties) {
         this.apiKeyAuthenticationFilter = apiKeyAuthenticationFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsProperties = corsProperties;
     }
 
     @Bean
@@ -74,9 +73,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowPrivateNetwork(allowPrivateNetwork);
+        configuration.setAllowPrivateNetwork(corsProperties.isAllowPrivateNetwork());
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        configuration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
         configuration.setAllowedHeaders(Arrays.asList("X-API-Key", "Content-Type", "Authorization"));
         configuration.setMaxAge(1800L);
