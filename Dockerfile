@@ -1,4 +1,4 @@
-FROM maven:4.0.0-rc-4-eclipse-temurin-25-noble
+FROM maven:4.0.0-rc-4-ibm-semeru-25-noble
 
 # Install curl for health check
 # RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.Customizer;
+// import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,8 +39,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-        .csrf(csrf -> csrf.disable())
+        // http.cors(Customizer.withDefaults())
+        http.csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .securityMatchers((matchers) -> matchers.requestMatchers("/health",
         "/actuator/health",
@@ -58,8 +58,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-        .csrf(csrf -> csrf.disable())
+        // http.cors(Customizer.withDefaults())
+        http.csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth.anyRequest().authenticated()
         )
@@ -72,7 +72,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowPrivateNetwork(corsProperties.isAllowPrivateNetwork());
-        configuration.setAllowCredentials(true);
+        // configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("X-API-Key", "Content-Type", "Authorization"));
