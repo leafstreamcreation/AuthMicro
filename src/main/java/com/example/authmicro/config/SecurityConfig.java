@@ -9,12 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-// import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
@@ -39,9 +37,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
-        // http.cors(Customizer.withDefaults())
-        http.csrf(csrf -> csrf.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .securityMatchers((matchers) -> matchers.requestMatchers("/health",
         "/actuator/health",
         "/login",
@@ -49,6 +45,8 @@ public class SecurityConfig {
         "/2fa/verify",
         "/recover",
         "/recover/**"))
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
         )
         .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -58,8 +56,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
-        // http.cors(Customizer.withDefaults())
-        http.csrf(csrf -> csrf.disable())
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth.anyRequest().authenticated()
         )
@@ -69,13 +67,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowPrivateNetwork(corsProperties.isAllowPrivateNetwork());
-        // configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("X-API-Key", "Content-Type", "Authorization"));
+        configuration.setAllowPrivateNetwork(corsProperties.isAllowPrivateNetwork());
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(1800L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
