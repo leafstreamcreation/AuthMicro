@@ -71,7 +71,6 @@ public class AuthService {
         Boolean isAdminLogin = serviceName.isEmpty() || serviceName == null;
 
         Optional<AuthUser> userOptional = userRepository.findByEmail(request.getEmail());
-        //oooo shit another bs commit
         if (userOptional.isEmpty() || !userOptional.get().isEnabled()) {
             throw new RuntimeException("Invalid credentials");
         }
