@@ -37,14 +37,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .securityMatchers((matchers) -> matchers.requestMatchers("/health",
+        http.securityMatchers((matchers) -> matchers.requestMatchers("/health",
         "/actuator/health",
         "/login",
         "/signup",
         "/2fa/verify",
         "/recover",
         "/recover/**"))
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
@@ -65,7 +65,7 @@ public class SecurityConfig {
         "/credentials"))
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated()
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
         )
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         

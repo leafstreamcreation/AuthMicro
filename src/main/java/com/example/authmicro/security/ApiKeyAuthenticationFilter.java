@@ -59,8 +59,14 @@ public class ApiKeyAuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         String base64KeyString = httpRequest.getHeader("X-API-Key");
+        if (base64KeyString == null) {
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Invalid or missing API key\"}");
+            return;
+        }
         byte[] inboundKey = Base64.getDecoder().decode(base64KeyString);
-
+        
         int saltByteStart = inboundKey.length - saltLength;
         int nonceByteStart = saltByteStart - nonceLength;
 
@@ -79,7 +85,7 @@ public class ApiKeyAuthenticationFilter implements Filter {
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, gcmParameterSpec);
         byte[] decryptedKeyBytes = cipher.doFinal(inboundCipherText);
         String decryptedKeyText = new String(decryptedKeyBytes, StandardCharsets.UTF_8);
-        if (inboundKey == null || !apiKeyCipher.equals(decryptedKeyText)) {
+        if (!apiKeyCipher.equals(decryptedKeyText)) {
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType("application/json");
             httpResponse.getWriter().write("{\"error\":\"Invalid or missing API key\"}");
