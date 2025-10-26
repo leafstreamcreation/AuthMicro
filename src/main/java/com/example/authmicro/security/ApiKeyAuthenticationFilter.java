@@ -66,7 +66,12 @@ public class ApiKeyAuthenticationFilter implements Filter {
             return;
         }
         byte[] inboundKey = Base64.getDecoder().decode(base64KeyString);
-        
+        if (inboundKey.length <= saltLength + nonceLength) {
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"error\":\"Invalid or missing API key\"}");
+            return;
+        }
         int saltByteStart = inboundKey.length - saltLength;
         int nonceByteStart = saltByteStart - nonceLength;
 

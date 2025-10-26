@@ -35,7 +35,6 @@ public class SecurityConfig {
         this.corsProperties = corsProperties;
     }
 
-    //what's wrong?? officially, Chloe wrecks me
     @Bean
     public SecurityFilterChain apiKeyFilterChain(HttpSecurity http) throws Exception {
         http.securityMatchers((matchers) -> matchers.requestMatchers("/health",
