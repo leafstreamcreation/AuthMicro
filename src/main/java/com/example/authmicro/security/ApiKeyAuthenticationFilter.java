@@ -2,8 +2,6 @@ package com.example.authmicro.security;
 
 import com.example.authmicro.config.ApiKeyProperties;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,7 +29,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-@Component
 public class ApiKeyAuthenticationFilter implements Filter {
 
     private String apiKeySecret;
