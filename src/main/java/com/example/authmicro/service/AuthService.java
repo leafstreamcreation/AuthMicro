@@ -172,6 +172,7 @@ public class AuthService {
             if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
                 throw new RuntimeException("Email already in use");
             }
+            //add email validation
             user.setEmail(request.getEmail());
         }
 
@@ -180,6 +181,7 @@ public class AuthService {
         }
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            //add password validation
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
 
