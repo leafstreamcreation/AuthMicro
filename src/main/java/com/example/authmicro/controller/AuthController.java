@@ -131,8 +131,9 @@ public class AuthController {
                                                   Authentication authentication) {
         try {
             Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
-            AuthUser updated = authService.updateUser(userId, request);
-            UserResponse response = authService.convertToUserResponse(updated);
+            String token = ((AuthenticationDetails) authentication.getDetails()).getToken();
+            authService.updateUser(userId, request);
+            LoginResponse response = authService.refreshToken(userId, null, token);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
