@@ -172,16 +172,29 @@ public class AuthService {
             if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
                 throw new RuntimeException("Email already in use");
             }
-            //add email validation
+            if (!request.getEmail().matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
+                throw new RuntimeException("Invalid email format");
+            }
             user.setEmail(request.getEmail());
         }
 
         if (request.getRole() != null) {
+            if(request.getRole() != Role.ADMIN && request.getRole() != Role.USER) {
+                throw new RuntimeException("Invalid role");
+            }
             user.setRole(request.getRole());
         }
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            //add password validation
+            if (request.getPassword().length() < 8) {
+                throw new RuntimeException("Password must be at least 8 characters long");
+            }
+            if (!request.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$")) {
+                throw new RuntimeException("Password must contain at least one number, one lowercase letter, one uppercase letter, and one special character");
+            }
+            if (passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+                throw new RuntimeException("New password must be different from the old password");
+            }
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
 
