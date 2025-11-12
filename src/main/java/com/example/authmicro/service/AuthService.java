@@ -111,7 +111,11 @@ public class AuthService {
         if (!user.isEnabled()) {
             throw new RuntimeException("User is disabled");
         }
-        if (!user.getLatest_Login().equals(token)) {
+        String latestLogin = user.getLatest_Login();
+        if (jwtService.isTokenExpired(latestLogin)) {
+            throw new RuntimeException("Login expired");
+        }
+        if (!latestLogin.equals(token)) {
             throw new RuntimeException("Invalid token");
         }
         String serviceName = name;

@@ -45,6 +45,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<Response> refresh(Authentication authentication) {
         
+        if(authentication == null) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Authentication is required"));
+        }
+
         try {
             Long userId = ((AuthenticationDetails) authentication.getDetails()).getUserId();
             String serviceName = ((AuthenticationDetails) authentication.getDetails()).getServiceName();
